@@ -1,6 +1,6 @@
 # Rust par la Pratique 🦀
 
-Apprendre Rust par la pratique — **25 exercices** progressifs, des bases jusqu'aux projets systèmes.
+Apprendre Rust par la pratique : **25 exercices** progressifs, des bases jusqu'aux projets systèmes.
 
 ## Prérequis
 
