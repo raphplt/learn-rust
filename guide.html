@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust par la Pratique — Guide de référence</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f3460;
+            --text-primary: #eaeaea;
+            --text-secondary: #b0b0b0;
+            --accent: #00d4ff;
+            --accent-alt: #ff6b9d;
+            --success: #00ff88;
+            --warning: #ffa500;
+            --code-bg: #0d1425;
+            --border-color: #2a3f5f;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            padding: 1rem 2rem;
+            text-align: center;
+            border-bottom: 2px solid var(--accent);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.1);
+            transition: padding 0.3s ease;
+        }
+
+        header.expanded {
+            padding: 3rem 2rem;
+        }
+
+        .header-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.4rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: all 0.2s ease;
+            line-height: 1;
+        }
+
+        .header-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .header-row {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            transition: font-size 0.3s ease, margin 0.3s ease;
+        }
+
+        header:not(.expanded) h1 {
+            font-size: 1.4rem;
+            margin-bottom: 0;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .header-collapsible {
+            overflow: hidden;
+            max-height: 300px;
+            opacity: 1;
+            transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        header:not(.expanded) .header-collapsible {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        /* Progress tracker */
+        .progress-tracker {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
+            gap: 8px;
+            margin-top: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .exercise-box {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .exercise-box:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* Navigation */
+        nav {
+            background-color: var(--bg-secondary);
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+
+        nav h2 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        nav ul {
+            list-style: none;
+            columns: 2;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                columns: 1;
+            }
+        }
+
+        nav li {
+            margin-bottom: 0.8rem;
+        }
+
+        nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: inline-block;
+        }
+
+        nav a:hover {
+            background-color: rgba(0, 212, 255, 0.1);
+            color: var(--accent);
+        }
+
+        /* Main container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Sections */
+        section {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-left: 4px solid var(--accent-alt);
+            scroll-margin-top: 100px;
+        }
+
+        section:nth-child(3n+1) {
+            border-left-color: #00d4ff;
+        }
+
+        section:nth-child(3n+2) {
+            border-left-color: #ff6b9d;
+        }
+
+        section:nth-child(3n) {
+            border-left-color: #ffa500;
+        }
+
+        h2 {
+            color: var(--accent);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h3 {
+            color: var(--accent-alt);
+            font-size: 1.3rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        /* Code blocks */
+        pre {
+            background-color: var(--code-bg);
+            border-radius: 6px;
+            padding: 1.2rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid var(--accent);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        /* Syntax highlighting classes */
+        .kw { color: #ff79c6; font-weight: 600; } /* Keywords */
+        .ty { color: #8be9fd; } /* Types */
+        .st { color: #f1fa8c; } /* Strings */
+        .cm { color: #6272a4; font-style: italic; } /* Comments */
+        .fn { color: #50fa7b; } /* Functions */
+        .nb { color: #ffb86c; } /* Numbers */
+
+        /* Pitfalls box */
+        .pitfalls {
+            background-color: rgba(255, 107, 157, 0.1);
+            border-left: 4px solid #ff6b9d;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .pitfalls summary {
+            color: #ff6b9d;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .pitfalls summary:hover {
+            color: var(--accent);
+        }
+
+        .pitfalls ul {
+            margin-top: 0.8rem;
+            margin-left: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .pitfalls li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Exercise links */
+        .exercises-ref {
+            background-color: rgba(0, 212, 255, 0.05);
+            border-radius: 6px;
+            padding: 0.8rem 1rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* Cheat sheet */
+        .cheatsheet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .cheatsheet-item {
+            background-color: var(--code-bg);
+            border-radius: 6px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .cheatsheet-item h4 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .cheatsheet-item code {
+            display: block;
+            margin: 0.5rem 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--bg-secondary);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            border-top: 2px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 0.95rem;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            section {
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            pre {
+                font-size: 0.8rem;
+                padding: 1rem;
+            }
+        }
+
+        /* Diagram styling */
+        .memory-diagram {
+            background-color: var(--code-bg);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        /* Emphasis */
+        .emphasize {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Details animation */
+        details {
+            margin: 1rem 0;
+        }
+
+        summary {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        details[open] summary {
+            margin-bottom: 0.8rem;
+        }
+
+        /* Smooth animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        section {
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <header id="main-header" class="expanded">
+        <div class="header-row">
+            <h1>Rust par la Pratique 🦀</h1>
+            <button class="header-toggle" onclick="toggleHeader()" title="Réduire/Agrandir le menu" id="toggle-btn">▲</button>
+        </div>
+        <div class="header-collapsible">
+        <p class="subtitle">Guide de référence — des bases aux projets systèmes</p>
+        <div class="progress-tracker">
+            <div class="exercise-box" title="Exercice 01">01</div>
+            <div class="exercise-box" title="Exercice 02">02</div>
+            <div class="exercise-box" title="Exercice 03">03</div>
+            <div class="exercise-box" title="Exercice 04">04</div>
+            <div class="exercise-box" title="Exercice 05">05</div>
+            <div class="exercise-box" title="Exercice 06">06</div>
+            <div class="exercise-box" title="Exercice 07">07</div>
+            <div class="exercise-box" title="Exercice 08">08</div>
+            <div class="exercise-box" title="Exercice 09">09</div>
+            <div class="exercise-box" title="Exercice 10">10</div>
+            <div class="exercise-box" title="Exercice 11">11</div>
+            <div class="exercise-box" title="Exercice 12">12</div>
+            <div class="exercise-box" title="Exercice 13">13</div>
+            <div class="exercise-box" title="Exercice 14">14</div>
+            <div class="exercise-box" title="Exercice 15">15</div>
+            <div class="exercise-box" title="Exercice 16">16</div>
+            <div class="exercise-box" title="Exercice 17">17</div>
+            <div class="exercise-box" title="Exercice 18">18</div>
+            <div class="exercise-box" title="Exercice 19">19</div>
+            <div class="exercise-box" title="Exercice 20">20</div>
+            <div class="exercise-box" title="Exercice 21">21</div>
+            <div class="exercise-box" title="Exercice 22">22</div>
+            <div class="exercise-box" title="Exercice 23">23</div>
+            <div class="exercise-box" title="Exercice 24">24</div>
+            <div class="exercise-box" title="Exercice 25">25</div>
+        </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Table of Contents -->
+        <nav>
+            <h2>📖 Table des matières</h2>
+            <ul>
+                <li><a href="#niveau-1">→ Niveau 1: Variables, Types & Fonctions</a></li>
+                <li><a href="#niveau-2">→ Niveau 2: Ownership & Borrowing</a></li>
+                <li><a href="#niveau-3">→ Niveau 3: Structs, Enums & Option</a></li>
+                <li><a href="#niveau-4">→ Niveau 4: Traits & Génériques</a></li>
+                <li><a href="#niveau-5">→ Niveau 5: Gestion d'Erreurs</a></li>
+                <li><a href="#niveau-6">→ Niveau 6: Collections & Itérateurs</a></li>
+                <li><a href="#niveau-7">→ Niveau 7: Lifetimes</a></li>
+                <li><a href="#niveau-8">→ Niveau 8: Smart Pointers</a></li>
+                <li><a href="#niveau-9">→ Niveau 9: Concurrence</a></li>
+                <li><a href="#niveau-10">→ Niveau 10: Projets DB</a></li>
+                <li><a href="#cheatsheet">→ Aide-mémoire</a></li>
+            </ul>
+        </nav>
+
+        <!-- Niveau 1 -->
+        <section id="niveau-1">
+            <h2>🏗️ Niveau 1: Variables, Types & Fonctions</h2>
+
+            <p>En Rust, les variables sont <span class="emphasize">immutables par défaut</span>. C'est la fondation de tout : le compilateur refuse de modifier ce qui n'a pas été explicitement déclaré comme mutable. Cela force une réflexion claire sur ce qui change et ce qui ne change pas.</p>
+
+            <p>Les types sont <span class="emphasize">fortement typés</span> mais souvent inférés. Rust déduit automatiquement le type à partir du contexte, sauf quand c'est ambigu. Les types primitifs (i32, f64, bool, &str) sont optimisés et très efficaces.</p>
+
+            <p>Les fonctions sont des citoyens de première classe : elles acceptent des paramètres typés, retournent une valeur (explicite ou implicite via l'expression finale), et peuvent être passées comme arguments. Le mot-clé <span class="emphasize">fn</span> est votre meilleur ami.</p>
+
+            <h3>Concept clé: Immutabilité par défaut</h3>
+            <pre><code><span class="kw">let</span> x = 5;           <span class="cm">// x est immutable</span>
+<span class="kw">let mut</span> y = 10;     <span class="cm">// y peut changer</span>
+y = 20;              <span class="cm">// OK</span>
+
+<span class="kw">fn</span> <span class="fn">add</span>(a: <span class="ty">i32</span>, b: <span class="ty">i32</span>) <span class="ty">-> i32</span> {
+    a + b            <span class="cm">// return implicite (pas de ;)</span>
+}
+
+<span class="kw">let</span> result = <span class="fn">add</span>(3, 4);</code></pre>
+
+            <p>Une <span class="emphasize">variable shadowing</span> permet de réutiliser un nom avec un nouveau type :</p>
+            <pre><code><span class="kw">let</span> x = 5;          <span class="cm">// i32</span>
+<span class="kw">let</span> x = "hello";    <span class="cm">// &str (shadowing, nouveau type)</span></code></pre>
+
+            <details class="pitfalls">
+                <summary>⚠️ Pièges courants</summary>
+                <ul>
+                    <li><strong>Oublier le point-virgule</strong>: sans <span class="cm">;</span>, l'expression devient la valeur retournée de la fonction.</li>
+                    <li><strong>Mutable par défaut</strong>: le compilateur refuse de modifier une variable non déclarée <span class="kw">mut</span>.</li>
+                    <li><strong>Types oubliés</strong>: parfois le compilateur ne peut pas inférer. Ajoutez l'annotation explicite : <code><span class="kw">let</span> x: <span class="ty">i32</span> = 5;</code></li>
+                </ul>
+            </details>
+
+            <div class="exercises-ref">→ Exercices: ex01, ex02, ex03, ex04</div>
+        </section>
+
+        <!-- Niveau 2 -->
+        <section id="niveau-2">
+            <h2>🔐 Niveau 2: Ownership & Borrowing (Le cœur de Rust)</h2>
+
+            <p><span class="emphasize">C'est le concept le plus important en Rust.</span> Chaque valeur a un propriétaire unique. Quand le propriétaire sort du scope, la mémoire est automatiquement libérée. Pas de garbage collector, pas de fuites mémoire.</p>
+
+            <p>Le système est basé sur 3 règles fondamentales : (1) chaque valeur a un propriétaire; (2) il ne peut y avoir qu'un propriétaire à la fois; (3) quand le propriétaire sort du scope, la valeur est détruite.</p>
+
+            <p>L'<span class="emphasize">emprunt</span> (borrowing) permet de passer une référence sans transférer la propriété. Il existe deux types : l'emprunt immutable (<code>&T</code>, plusieurs possibles) et l'emprunt mutable (<code>&mut T</code>, un seul à la fois). Le compilateur garantit qu'il n'y a jamais de data race.</p>
+
+            <h3>Concept clé: Le Move (transfert de propriété)</h3>
+            <pre><code><span class="kw">let</span> s1 = <span class="st">"hello"</span>.to_string();   <span class="cm">// s1 possède la String</span>
+<span class="kw">let</span> s2 = s1;                    <span class="cm">// move! s1 n'existe plus</span>
+<span class="cm">// println!("{}", s1);  // ERREUR: s1 n'existe plus</span>
+println!(<span class="st">"{}"</span>, s2);             <span class="cm">// OK</span></code></pre>
+
+            <h3>Concept clé: Le Borrowing (l'emprunt)</h3>
+            <pre><code><span class="kw">let</span> s = <span class="st">"hello"</span>.to_string();
+<span class="fn">print_len</span>(&s);           <span class="cm">// emprunt immutable, s existe toujours</span>
+println!(<span class="st">"{}"</span>, s);        <span class="cm">// OK</span>
+
+<span class="kw">fn</span> <span class="fn">print_len</span>(s: &<span class="ty">String</span>) {
+    println!(<span class="st">"{}"</span>, s.len());
+}</code></pre>
+
+            <h3>Diagramme mémoire: Move vs Borrowing</h3>
+            <div class="memory-diagram">
+<span class="cm">// MOVE : Transfert de propriété</span>
+s1 ─→ String { data: "hello", len: 5 }
+<span class="kw">let</span> s2 = s1;
+              ↓
+           (s1 n'existe plus)
+s2 ─→ String { data: "hello", len: 5 }
+
+<span class="cm">// BORROWING : Emprunt (référence)</span>
+s  ─→ String { data: "hello", len: 5 } ← &s
+          ↑
+    (référence, s existe toujours)
+            </div>
+
+            <h3>Emprunt mutable vs immutable</h3>
+            <pre><code><span class="kw">let mut</span> s = <span class="st">"hello"</span>.to_string();
+<span class="fn">modify</span>(&<span class="kw">mut</span> s);              <span class="cm">// emprunt mutable</span>
+println!(<span class="st">"{}"</span>, s);             <span class="cm">// s a été modifiée</span>
+
+<span class="kw">fn</span> <span class="fn">modify</span>(s: &<span class="kw">mut</span> <span class="ty">String</span>) {
+    s.push_str(<span class="st">" world"</span>);
+}</code></pre>
+
+            <h3>La règle du borrow checker</h3>
+            <p>Vous ne pouvez <span class="emphasize">pas</span> avoir à la fois une référence mutable ET une référence immutable :</p>
+            <pre><code><span class="kw">let mut</span> v = vec![1, 2, 3];
+<span class="kw">let</span> r1 = &v;              <span class="cm">// emprunt immutable</span>
+<span class="kw">let</span> r2 = &v;              <span class="cm">// OK, un autre emprunt immutable</span>
+<span class="cm">// let r3 = &mut v;         // ERREUR: conflit!</span>
+println!(<span class="st">"{:?}"</span>, r1);       <span class="cm">// r1 et r2 sont utilisées ici</span></code></pre>
+
+            <details class="pitfalls">
+                <summary>⚠️ Pièges courants</summary>
+                <ul>
+                    <li><strong>Move inattendu</strong>: passer une valeur à une fonction sans &amp; la transfère. Utilisez <code>&T</code> pour garder la propriété.</li>
+                    <li><strong>Conflit de borrows</strong>: le borrow checker refuse souvent de compiler si vous mélangez &amp; et &amp;mut. Pensez au "scope" de l'emprunt : il finit quand la référence n'est plus utilisée.</li>
+                    <li><strong>Retourner une référence au scope local</strong>: impossible! Une fonction ne peut pas retourner &amp;T si T est local. Utilisez les lifetimes ou retournez une valeur possédée.</li>
+                </ul>
+            </details>
+
+            <div class="exercises-ref">→ Exercices: ex05, ex06, ex07</div>
+        </section>
+
+        <!-- Niveau 3 -->
+        <section id="niveau-3">
+            <h2>🎁 Niveau 3: Structs, Enums & Option</h2>
+
+            <p>Les <span class="emphasize">structs</span> regroupent plusieurs champs typés dans une structure nommée. C'est votre outil pour modéliser des données complexes. Chaque champ peut avoir un type différent, et vous pouvez implémenter des méthodes sur la struct.</p>
+
+            <p>Les <span class="emphasize">enums</span> représentent une valeur qui peut être l'une de plusieurs variantes. Contrairement à beaucoup de langages, chaque variante peut contenir des données. Une enum est somme de types : ou A ou B ou C.</p>
+
+            <p><span class="emphasize">Option&lt;T&gt;</span> est une enum built-in qui représente "peut-être une valeur ou rien". Au lieu d'utiliser null (dangereux), Rust force vous à gérer explicitement les deux cas avec le pattern matching.</p>
+
+            <h3>Structs et implémentation</h3>
+            <pre><code><span class="kw">struct</span> <span class="ty">Person</span> {
+    name: <span class="ty">String</span>,
+    age: <span class="ty">u32</span>,
+}
+
+<span class="kw">impl</span> <span class="ty">Person</span> {
+    <span class="kw">fn</span> <span class="fn">new</span>(name: <span class="ty">String</span>, age: <span class="ty">u32</span>) <span class="ty">-> Self</span> {
+        <span class="ty">Person</span> { name, age }
+    }
+
+    <span class="kw">fn</span> <span class="fn">birthday</span>(&<span class="kw">mut</span> <span class="ty">self</span>) {
+        <span class="ty">self</span>.age += 1;
+    }
+}
+
+<span class="kw">let mut</span> p = <span class="ty">Person</span>::<span class="fn">new</span>(<span class="st">"Alice"</span>.to_string(), 30);
+p.<span class="fn">birthday</span>();</code></pre>
+
+            <h3>Enums avec données</h3>
+            <pre><code><span class="kw">enum</span> <span class="ty">Message</span> {
+    Quit,
+    Move { x: <span class="ty">i32</span>, y: <span class="ty">i32</span> },
+    Write(<span class="ty">String</span>),
+    Color(<span class="ty">u8</span>, <span class="ty">u8</span>, <span class="ty">u8</span>),
+}
+
+<span class="kw">let</span> msg = <span class="ty">Message</span>::<span class="fn">Write</span>(<span class="st">"hello"</span>.to_string());
+
+<span class="kw">match</span> msg {
+    <span class="ty">Message</span>::Quit =&gt; println!(<span class="st">"Quit"</span>),
+    <span class="ty">Message</span>::Move { x, y } =&gt; println!(<span class="st">"Move to {}, {}"</span>, x, y),
+    <span class="ty">Message</span>::Write(s) =&gt; println!(<span class="st">"Write: {}"</span>, s),
+    <span class="ty">Message</span>::Color(r, g, b) =&gt; println!(<span class="st">"RGB"</span>),
+}</code></pre>
+
+            <h3>Option&lt;T&gt;: Gérer l'absence de valeur</h3>
+            <pre><code><span class="kw">let</span> x: <span class="ty">Option</span>&lt;<span class="ty">i32</span>&gt; = <span class="ty">Some</span>(5);
+<span class="kw">let</span> y: <span class="ty">Option</span>&lt;<span class="ty">i32</span>&gt; = <span class="ty">None</span>;
+
+<span class="kw">match</span> x {
+    <span class="ty">Some</span>(val) =&gt; println!(<span class="st">"Got {}"</span>, val),
+    <span class="ty">None</span> =&gt; println!(<span class="st">"Nothing"</span>),
+}
+
+<span class="cm">// Méthodes pratiques sur Option</span>
+<span class="kw">let</span> result = x.<span class="fn">map</span>(|v| v + 1);    <span class="cm">// Some(6)</span>
+<span class="kw">let</span> val = y.<span class="fn">unwrap_or</span>(0);    <span class="cm">// 0 (par défaut)</span></code></pre>
+
+            <details class="pitfalls">
+                <summary>⚠️ Pièges courants</summary>
+                <ul>
+                    <li><strong>unwrap() sur None</strong>: <code>.unwrap()</code> panique si l'Option est None. Préférez <code>.unwrap_or(default)</code> ou pattern matching.</li>
+                    <li><strong>Oublier de pattern-matcher</strong>: une enum ne se "convertit" pas automatiquement. Utilisez <code>match</code> pour extraire les variantes.</li>
+                    <li><strong>Champs mutables</strong>: pour modifier un champ d'une struct, la struct elle-même doit être <code>mut</code>. Cela peut être verbose ; utilisez des builder patterns pour les gros modèles.</li>
+                </ul>
+            </details>
+
+            <div class="exercises-ref">→ Exercices: ex08, ex09, ex10</div>
+        </section>
+
+        <!-- Niveau 4 -->
+        <section id="niveau-4">
+            <h2>🧬 Niveau 4: Traits & Génériques</h2>
+
+            <p>Les <span class="emphasize">traits</span> définissent un ensemble de méthodes que d'autres types peuvent implémenter. C'est votre outil pour la polymorphie et l'abstraction. Un trait est un contrat : "si tu implémentes Display, tu dois avoir une méthode fmt()".</p>
+
+            <p>Les <span class="emphasize">génériques</span> permettent d'écrire du code qui fonctionne avec n'importe quel type. Une fonction générique <code>fn foo&lt;T&gt;(x: T)</code> est compilée une fois par type utilisé (monomorphisation).</p>
+
+            <p>Les <span class="emphasize">trait bounds</span> combinent les deux : vous pouvez dire "T doit implémenter Debug et Clone". Cela force le compilateur à vérifier que T a vraiment ces capacités.</p>
+
+            <h3>Traits: Définir et implémenter</h3>
+            <pre><code><span class="kw">trait</span> <span class="ty">Drawable</span> {
+    <span class="kw">fn</span> <span class="fn">draw</span>(&<span class="ty">self</span>);
+}
+
+<span class="kw">struct</span> <span class="ty">Circle</span> { radius: <span class="ty">f64</span> }
+
+<span class="kw">impl</span> <span class="ty">Drawable</span> <span class="kw">for</span> <span class="ty">Circle</span> {
+    <span class="kw">fn</span> <span class="fn">draw</span>(&<span class="ty">self</span>) {
+        println!(<span class="st">"Drawing circle"</span>);
+    }
+}
+
+<span class="kw">fn</span> <span class="fn">render</span>(shape: &<span class="kw">dyn</span> <span class="ty">Drawable</span>) {
+    shape.<span class="fn">draw</span>();
+}</code></pre>
+
+            <h3>Génériques avec trait bounds</h3>
+            <pre><code><span class="kw">fn</span> <span class="fn">print_it</span>&lt;<span class="ty">T</span>: <span class="ty">std::fmt::Debug</span>&gt;(val: <span class="ty">T</span>) {
+    println!(<span class="st">"{:?}"</span>, val);
+}
+
+<span class="kw">struct</span> <span class="ty">Container</span>&lt;<span class="ty">T</span>&gt; {
+    item: <span class="ty">T</span>,
+}
+
+<span class="kw">impl</span>&lt;<span class="ty">T</span>: <span class="ty">Clone</span>&gt; <span class="ty">Container</span>&lt;<span class="ty">T</span>&gt; {
+    <span class="kw">fn</span> <span class="fn">clone_item</span>(&<span class="ty">self</span>) <span class="ty">-> T</span> {
+        <span class="ty">self</span>.item.<span class="fn">clone</span>()
+    }
+}</code></pre>
+
+            <details class="pitfalls">
+                <summary>⚠️ Pièges courants</summary>
+                <ul>
+                    <li><strong>Trait objects et vtables</strong>: <code>&dyn Trait</code> implique une indirection et une recherche dynamique. C'est plus lent que la monomorphisation générique.</li>
+                    <li><strong>Oublier Clone ou Copy</strong>: les génériques ne savent pas si T peut être copié. Ajoutez <code>T: Copy</code> si vous en avez besoin.</li>
+                    <li><strong>Associated types vs génériques</strong>: un trait peut avoir des types associés (<code>type Item;</code>). Préférez-les pour simplifier l'API.</li>
+                </ul>
+            </details>
+
+            <div class="exercises-ref">→ Exercices: ex11, ex12</div>
+        </section>
+
+        <!-- Niveau 5 -->
+        <section id="niveau-5">
+            <h2>🛡️ Niveau 5: Gestion d'Erreurs</h2>
+
+            <p>Rust n'a pas d'exceptions. À la place, il utilise <span class="emphasize">Result&lt;T, E&gt;</span>, une enum qui peut être Ok(value) ou Err(error). Cela force à gérer explicitement les erreurs.</p>
+
+            <p>L'opérateur <span class="emphasize">?</span> est sucre syntaxique : il "remonte" une erreur automatiquement. Si l'opération retourne Err, la fonction retourne Err immédiatement. Sinon, on continue avec Ok.</p>
+
+            <p>Panic est réservée aux situations vraiment irrécupérables (invariants violés, bugs). Pour les erreurs normales, retournez Result.</p>
+
+            <h3>Result&lt;T, E&gt; et le match</h3>
+            <pre><code><span class="kw">fn</span> <span class="fn">divide</span>(a: <span class="ty">f64</span>, b: <span class="ty">f64</span>) <span class="ty">-> Result</span>&lt;<span class="ty">f64</span>, <span class="ty">String</span>&gt; {
+    <span class="kw">if</span> b == 0.0 {
+        <span class="ty">Err</span>(<span class="st">"Division by zero"</span>.to_string())
+    } <span class="kw">else</span> {
+        <span class="ty">Ok</span>(a / b)
+    }
+}
+
+<span class="kw">match</span> <span class="fn">divide</span>(10.0, 2.0) {
+    <span class="ty">Ok</span>(result) =&gt; println!(<span class="st">"Result: {}"</span>, result),
+    <span class="ty">Err</span>(e) =&gt; println!(<span class="st">"Error: {}"</span>, e),
+}</code></pre>
+
+            <h3>L'opérateur ? pour propager les erreurs</h3>
+            <pre><code><span class="kw">fn</span> <span class="fn">read_file</span>(path: &<span class="ty">str</span>) <span class="ty">-> Result</span>&lt;<span class="ty">String</span>, <span class="ty">std::io::Error</span>&gt; {
+    <span class="kw">let</span> content = std::fs::<span class="fn">read_to_string</span>(path)?;  <span class="cm">// ? remonte l'erreur</span>
+    <span class="ty">Ok</span>(content)
+}
+
+<span class="cm">// Sans ?, cela serait :</span>
+<span class="kw">fn</span> <span class="fn">read_file_verbose</span>(path: &<span class="ty">str</span>) <span class="ty">-> Result</span>&lt;<span class="ty">String</span>, <span class="ty">std::io::Error</span>&gt; {
+    <span class="kw">match</span> std::fs::<span class="fn">read_to_string</span>(path) {
+        <span class="ty">Ok</span>(content) =&gt; <span class="ty">Ok</span>(content),
+        <span class="ty">Err</span>(e) =&gt; <span class="ty">Err</span>(e),
+    }
+}</code></pre>
+
+            <details class="pitfalls">
+                <summary>⚠️ Pièges courants</summary>
+                <ul>
+                    <li><strong>unwrap() sur Err</strong>: comme avec Option, cela panique. Utilisez <code>.unwrap_or(default)</code> ou <code>.expect("message")</code> (panique avec un message).</li>
+                    <li><strong>? en dehors d'une fonction Result</strong>: l'opérateur ? ne fonctionne que dans une fonction qui retourne Result (ou Option). Dans main(), utilisez <code>.unwrap()</code> ou <code>?</code> (si main retourne Result).</li>
+                    <li><strong>Erreurs vagues</strong>: retourner String comme erreur perd les détails. Créez vos propres types d'erreur ou utilisez des crates comme thiserror.</li>
+                </ul>
+            </details>
+
+            <div class="exercises-ref">→ Exercices: ex13, ex14</div>
+        </section>
+
+        <!-- Niveau 6 -->
+        <section id="niveau-6">
+            <h2>📦 Niveau 6: Collections, Itérateurs & Closures</h2>
+
+            <p>Les <span class="emphasize">collections</span> (Vec, HashMap, HashSet) sont des conteneurs flexibles. Vec est un vecteur dynamique—un array qui grandit. HashMap stocke des paires clé-valeur.</p>
+
+            <p>Les <span class="emphasize">itérateurs</span> parcourent les collections de façon paresseuse. Ils sont très efficaces : <code>vec.iter().map().filter().collect()</code> est compilé en code optimisé sans allocations intermédiaires.</p>
+
+            <p>Les <span class="emphasize">closures</span> sont des fonctions anonymes qui capturent leur environnement. <code>|x| x + 1</code> est une closure simple. Elles peuvent capturer par référence, par référence mutable, ou par déplacement.</p>
+
+            <h3>Vec et opérations courantes</h3>
+            <pre><code><span class="kw">let mut</span> v = <span class="fn">vec!</span>[1, 2, 3];
+v.<span class="fn">push</span>(4);
+v.<span class="fn">pop</span>();          <span class="cm">// retourne Some(4)</span>
+<span class="kw">let</span> first = v[0];  <span class="cm">// accès direct</span>
+
+<span class="kw">for</span> item <span class="kw">in</span> &v {
+    println!(<span class="st">"{}"</span>, item);
+}</code></pre>
+
+            <h3>Itérateurs: une programmation élégante</h3>
+            <pre><code><span class="kw">let</span> v = <span class="fn">vec!</span>[1, 2, 3, 4, 5];
+
+<span class="cm">// Chaîner les opérations</span>
+<span class="kw">let</span> result: <span class="ty">Vec</span> = v.<span class="fn">iter</span>()
+    .<span class="fn">filter</span>(|x| *x > 2)
+    .<span class="fn">map</span>(|x| x * 2)
+    .<span class="fn">collect</span>();
+
+<span class="cm">// result = [6, 8, 10]</span></code></pre>
+
+            <h3>Closures: capturer l'environnement</h3>
+            <pre><code><span class="kw">let</span> x = 5;
+<span class="kw">let</span> add_x = |y| y + x;     <span class="cm">// capture x par ref</span>
+println!(<span class="st">"{}"</span>, <span class="fn">add_x</span>(3));   <span class="cm">// 8</span>
+
+<span class="kw">let mut</span> counter = 0;
+<span class="kw">let mut</span> inc = || {         <span class="cm">// capture mut</span>
+    counter += 1;
+    counter
+};
+<span class="fn">inc</span>();                     <span class="cm">// 1</span>
+<span class="fn">inc</span>();                     <span class="cm">// 2</span></code></pre>
+
+            <details class="pitfalls">
+                <summary>⚠️ Pièges courants</summary>
+                <ul>
+                    <li><strong>Index hors limites</strong>: v[n] panique si n >= v.len(). Utilisez <code>.get(n)</code> qui retourne Option.</li>
+                    <li><strong>Capturage par déplacement</strong>: les closures capturent par référence par défaut, mais parfois elles doivent capturer par déplacement (move). Utilisez <code>move ||</code> si nécessaire.</li>
+                    <li><strong>Itérateurs paresseux</strong>: <code>v.iter().map()</code> ne fait rien jusqu'à <code>.collect()</code>. Oublier collect() = pas de résultat!</li>
+                </ul>
+            </details>
+
+            <div class="exercises-ref">→ Exercices: ex15, ex16, ex17</div>
+        </section>
+
+        <!-- Niveau 7 -->
+        <section id="niveau-7">
+            <h2>⏳ Niveau 7: Lifetimes (Les durées de vie)</h2>
+
+            <p><span class="emphasize">Les lifetimes sont la façon de Rust d'exprimer "cette référence est valide tant que...". </span>Elles ne changent pas le runtime—c'est une annotation pour le compilateur.</p>
+
+            <p>Pourquoi? Parce qu'une référence doit toujours pointer vers une données valide. Si vous retournez <code>&String</code> d'une fonction et que la String est détruite, vous avez undefined behavior. Les lifetimes forcent vous à penser à cela.</p>
+
+            <p>Dans la plupart des cas, Rust <span class="emphasize">déduit</span> les lifetimes automatiquement. Mais quand il y a ambiguïté—plusieurs références, une retournée—il vous demande de les annoter explicitement.</p>
+
+            <h3>Concept clé: Lifetime annotations</h3>
+            <pre><code><span class="cm">// Deux références: laquelle est le lifetime du résultat?</span>
+<span class="kw">fn</span> <span class="fn">longest</span>&lt;<span class="st">'a</span>&gt;(s1: &<span class="st">'a</span> <span class="ty">str</span>, s2: &<span class="st">'a</span> <span class="ty">str</span>) <span class="ty">-> &'a str</span> {
+    <span class="kw">if</span> s1.<span class="fn">len</span>() &gt; s2.<span class="fn">len</span>() { s1 } <span class="kw">else</span> { s2 }
+}
+
+<span class="cm">// 'a signifie: la référence retournée est valide</span>
+<span class="cm">// aussi longtemps que BOTH s1 et s2 sont valides</span></code></pre>
+
+            <h3>Diagramme: Les lifetimes en mémoire</h3>
+            <div class="memory-diagram">
+<span class="cm">// Les références doivent « vivre » au moins aussi longtemps</span>
+<span class="cm">// que la donnée qu'elles pointent</span>
+
+<span class="cm">❌ INVALIDE:</span>
+<span class="kw">fn</span> <span class="fn">bad</span>() <span class="ty">-> &'static str</span> {
+    <span class="kw">let</span> s = <span class="st">"hello"</span>.to_string();
+    &s  <span class="cm">// ERREUR: s est destroyed après la fonction</span>
+}
+
+<span class="cm">✅ VALIDE:</span>
+<span class="kw">fn</span> <span class="fn">good</span>() <span class="ty">-> String</span> {
+    <span class="kw">let</span> s = <span class="st">"hello"</span>.to_string();
+    s   <span class="cm">// OK: on retourne la valeur possédée</span>
+}
+
+<span class="cm">✅ VALIDE (avec paramètre):</span>
+<span class="kw">fn</span> <span class="fn">borrow</span>&lt;<span class="st">'a</span>&gt;(s: &<span class="st">'a str</span>) <span class="ty">-> &'a str</span> {
+    s   <span class="cm">// OK: le lifetime de s est préservé</span>
+}
+            </div>
+
+            <h3>Les 3 règles d'Elision (implicites)</h3>
+            <pre><code><span class="cm">// Ces trois fonctions sont équivalentes:</span>
+
+<span class="cm">// Règle 1: une référence → lifetime implicite</span>
+<span class="kw">fn</span> <span class="fn">foo</span>(s: &<span class="ty">str</span>) <span class="ty">-> &str</span>   <span class="cm">// OK, inféré</span>
+
+<span class="cm">// Explicite:</span>
+<span class="kw">fn</span> <span class="fn">foo</span>&lt;<span class="st">'a</span>&gt;(s: &<span class="st">'a str</span>) <span class="ty">-> &'a str</span>
+
+<span class="cm">// Règle 2: &self → lifetime du self</span>
+<span class="kw">struct</span> <span class="ty">S</span>;
+<span class="kw">impl</span> <span class="ty">S</span> {
+    <span class="kw">fn</span> <span class="fn">method</span>(&<span class="ty">self</span>) <span class="ty">-> &str</span>  <span class="cm">// OK, 'a := self</span>
+}</code></pre>
+
+            <details class="pitfalls">
+                <summary>⚠️ Pièges courants</summary>
+                <ul>
+                    <li><strong>'static vs autres lifetimes</strong>: <code>'static</code> signifie "valide pendant toute la durée du programme". Les chaînes littérales ("hello") sont 'static. Autres références ont des lifetimes limités.</li>
+                    <li><strong>Retourner une référence au local</strong>: c'est l'erreur classique. Impossible! Si vous quittez la fonction, la valeur locale est détruite. Retournez une valeur possédée (String) ou une référence à un paramètre.</li>
+                    <li><strong>Trop d'annotations</strong>: Rust infère souvent. Si vous êtes tenté d'annoter chaque référence, pensez si vous pouvez retourner une valeur possédée à la place.</li>
+                </ul>
+            </details>
+
+            <div class="exercises-ref">→ Exercices: ex18</div>
+        </section>
+
+        <!-- Niveau 8 -->
+        <section id="niveau-8">
+            <h2>🎯 Niveau 8: Smart Pointers</h2>
+
+            <p>Un <span class="emphasize">smart pointer</span> est un pointeur qui fait plus qu'un pointeur brut. Il gère automatiquement la mémoire. Les plus courants : Box&lt;T&gt; (alloue sur le heap), Rc&lt;T&gt; (référence comptée), et RefCell&lt;T&gt; (emprunts à runtime).</p>
+
+            <p><span class="emphasize">Box&lt;T&gt;</span> met une valeur sur le heap au lieu de la stack. C'est utile pour les types récursifs ou quand vous ne connaissez pas la taille. Quand la Box sort du scope, la mémoire est libérée.</p>
+
+            <p><span class="emphasize">Rc&lt;T&gt;</span> permet la propriété partagée: plusieurs propriétaires, une seule donnée. Quand le dernier propriétaire s'en va, la donnée est détruite. C'est single-threaded; pour multi-threaded, utilisez Arc&lt;T&gt;.</p>
+
+            <p><span class="emphasize">RefCell&lt;T&gt;</span> permet des emprunts mutables à runtime au lieu de compile-time. Utile quand le borrow checker refuse, mais attention: une violation au runtime panique!</p>
+
+            <h3>Box: Allouer sur le heap</h3>
+            <pre><code><span class="kw">let</span> b = <span class="ty">Box</span>::<span class="fn">new</span>(5);
+println!(<span class="st">"{}"</span>, *b);  <span class="cm">// déréférencer</span>
+
+<span class="kw">enum</span> <span class="ty">List</span> {
+    Cons(<span class="ty">i32</span>, <span class="ty">Box</span>&lt;<span class="ty">List</span>&gt;),  <span class="cm">// récursif!</span>
+    Nil,
+}</code></pre>
+
+            <h3>Rc: Propriété partagée</h3>
+            <pre><code><span class="kw">use</span> std::rc::<span class="ty">Rc</span>;
+
+<span class="kw">let</span> a = <span class="ty">Rc</span>::<span class="fn">new</span>(<span class="fn">vec!</span>[1, 2, 3]);
+<span class="kw">let</span> b = <span class="ty">Rc</span>::<span class="fn">clone</span>(&a);  <span class="cm">// clone la ref, pas les données</span>
+<span class="kw">let</span> c = <span class="ty">Rc</span>::<span class="fn">clone</span>(&a);
+
+<span class="cm">// a, b, c partagent les mêmes données</span></code></pre>
+
+            <h3>RefCell: Emprunts à runtime</h3>
+            <pre><code><span class="kw">use</span> std::cell::<span class="ty">RefCell</span>;
+
+<span class="kw">let</span> cell = <span class="ty">RefCell</span>::<span class="fn">new</span>(5);
+{
+    <span class="kw">let mut</span> r = cell.<span class="fn">borrow_mut</span>();  <span class="cm">// emprunt mutable</span>
+    *r += 1;
+}  <span class="cm">// l'emprunt se termine ici</span>
+println!(<span class="st">"{}"</span>, *cell.<span class="fn">borrow</span>());  <span class="cm">// 6</span></code></pre>
+
+            <details class="pitfalls">
+                <summary>⚠️ Pièges courants</summary>
+                <ul>
+                    <li><strong>Rc vs Arc</strong>: Rc n'est pas thread-safe. Pour la concurrence, utilisez Arc&lt;T&gt;.</li>
+                    <li><strong>RefCell panics</strong>: si vous avez déjà emprunté mutablement et vous essayez de ré-emprunter, ça panique à runtime. C'est la "fuite" du borrow checker.</li>
+                    <li><strong>Rc&lt;RefCell&lt;T&gt;&gt; patterns</strong>: c'est courant pour les structures mutables partagées, mais peut devenir complexe. Réfléchissez si vous en avez vraiment besoin.</li>
+                </ul>
+            </details>
+
+            <div class="exercises-ref">→ Exercices: ex19, ex20</div>
+        </section>
+
+        <!-- Niveau 9 -->
+        <section id="niveau-9">
+            <h2>⚡ Niveau 9: Concurrence</h2>
+
+            <p>Rust rend la concurrence <span class="emphasize">sûre par défaut</span>. Le système de propriété et de traits garantit qu'il n'y a pas de data races. Les threads doivent utiliser Send (peut être envoyé) et Sync (peut être partagé).</p>
+
+            <p><span class="emphasize">std::thread::spawn</span> crée un thread. L'expression closure doit capturer uniquement des valeurs Send, ou vous devez utiliser move. Les channels permettent la communication entre threads sans partage de mémoire.</p>
+
+            <p>Les <span class="emphasize">mutexes (Mutex&lt;T&gt;)</span> protègent une donnée partagée. Contrairement à beaucoup de langages, Rust force à verrouiller explicitement : vous ne pouvez pas oublier. Arc&lt;Mutex&lt;T&gt;&gt; combine la propriété partagée avec le protection.</p>
+
+            <h3>Créer et joindre des threads</h3>
+            <pre><code><span class="kw">use</span> std::thread;
+
+<span class="kw">let</span> handle = thread::<span class="fn">spawn</span>(|| {
+    println!(<span class="st">"Hello from thread"</span>);
+});
+
+handle.<span class="fn">join</span>().<span class="fn">unwrap</span>();  <span class="cm">// attendre la fin</span></code></pre>
+
+            <h3>Channels: Communication safe</h3>
+            <pre><code><span class="kw">use</span> std::sync::mpsc;
+<span class="kw">use</span> std::thread;
+
+<span class="kw">let</span> (tx, rx) = mpsc::<span class="fn">channel</span>();
+
+thread::<span class="fn">spawn</span>(<span class="kw">move</span> || {
+    tx.<span class="fn">send</span>(<span class="st">"message"</span>).<span class="fn">unwrap</span>();
+});
+
+<span class="kw">let</span> msg = rx.<span class="fn">recv</span>().<span class="fn">unwrap</span>();  <span class="cm">// bloquer jusqu'à réception</span></code></pre>
+
+            <h3>Mutex: Partager et protéger</h3>
+            <pre><code><span class="kw">use</span> std::sync::{Arc, Mutex};
+<span class="kw">use</span> std::thread;
+
+<span class="kw">let</span> counter = <span class="ty">Arc</span>::<span class="fn">new</span>(<span class="ty">Mutex</span>::<span class="fn">new</span>(0));
+<span class="kw">let mut</span> handles = <span class="fn">vec!</span>[];
+
+<span class="kw">for</span> _ <span class="kw">in</span> 0..10 {
+    <span class="kw">let</span> c = <span class="ty">Arc</span>::<span class="fn">clone</span>(&counter);
+    <span class="kw">let</span> handle = thread::<span class="fn">spawn</span>(<span class="kw">move</span> || {
+        <span class="kw">let mut</span> num = c.<span class="fn">lock</span>().<span class="fn">unwrap</span>();
+        *num += 1;
+    });
+    handles.<span class="fn">push</span>(handle);
+}
+
+<span class="kw">for</span> handle <span class="kw">in</span> handles {
+    handle.<span class="fn">join</span>().<span class="fn">unwrap</span>();
+}</code></pre>
+
+            <details class="pitfalls">
+                <summary>⚠️ Pièges courants</summary>
+                <ul>
+                    <li><strong>Move closures</strong>: si vous envoyez une closure dans un thread, elle doit utiliser <code>move</code> pour capturer la propriété des variables.</li>
+                    <li><strong>Panics dans les threads</strong>: un panic dans un thread ne tue pas le programme principal. Capturez le résultat de <code>join()</code> pour détecter les panics.</li>
+                    <li><strong>Deadlocks</strong>: Rust ne les prévient pas. Si vous attendez A en tenant B, et un autre thread attend B en tenant A, c'est deadlock. Soyez attentif à l'ordre.</li>
+                </ul>
+            </details>
+
+            <div class="exercises-ref">→ Exercices: ex21, ex22</div>
+        </section>
+
+        <!-- Niveau 10 -->
+        <section id="niveau-10">
+            <h2>🗄️ Niveau 10: Projets DB (Base de données)</h2>
+
+            <p>Ces exercices appliquent tous les concepts précédents à la construction d'une base de données simple. Vous utiliserez structs pour modéliser les données, traits pour l'abstraction, gestion d'erreurs pour la robustesse, collections pour stocker, et peut-être concurrence pour les opérations simultanees.</p>
+
+            <p>Une DB typique a: (1) <span class="emphasize">un modèle de donnée</span> (structs/enums), (2) <span class="emphasize">un storage</span> (Vec, HashMap, fichier), (3) <span class="emphasize">une API</span> (insert, query, delete) qui retourne Result, (4) <span class="emphasize">des validations</span> pour garantir l'intégrité.</p>
+
+            <p>Les patterns clés : Builder pour la configuration, Traits pour l'abstraction du storage, Result pour les erreurs, et Rc/Mutex si plusieurs clients accèdent simultanément.</p>
+
+            <h3>Structure simple d'une DB en mémoire</h3>
+            <pre><code><span class="kw">struct</span> <span class="ty">Database</span>&lt;<span class="ty">T</span>&gt; {
+    data: <span class="ty">Vec</span>&lt;<span class="ty">T</span>&gt;,
+}
+
+<span class="kw">impl</span>&lt;<span class="ty">T</span>: <span class="ty">Clone</span>&gt; <span class="ty">Database</span>&lt;<span class="ty">T</span>&gt; {
+    <span class="kw">fn</span> <span class="fn">new</span>() <span class="ty">-> Self</span> {
+        <span class="ty">Database</span> { data: <span class="fn">vec!</span>[] }
+    }
+
+    <span class="kw">fn</span> <span class="fn">insert</span>(&<span class="kw">mut</span> <span class="ty">self</span>, item: <span class="ty">T</span>) {
+        <span class="ty">self</span>.data.<span class="fn">push</span>(item);
+    }
+
+    <span class="kw">fn</span> <span class="fn">query</span>(&<span class="ty">self</span>, f: &<span class="kw">dyn</span> <span class="ty">Fn</span>(&<span class="ty">T</span>) <span class="ty">-> bool</span>) <span class="ty">-> Vec</span>&lt;<span class="ty">T</span>&gt; {
+        <span class="ty">self</span>.data.<span class="fn">iter</span>()
+            .<span class="fn">filter</span>(|x| <span class="fn">f</span>(x))
+            .<span class="fn">map</span>(|x| x.<span class="fn">clone</span>())
+            .<span class="fn">collect</span>()
+    }
+}
+
+<span class="kw">let mut</span> db = <span class="ty">Database</span>::<span class="fn">new</span>();
+db.<span class="fn">insert</span>(<span class="st">"Alice"</span>);
+<span class="kw">let</span> results = db.<span class="fn">query</span>(&|name| name.<span class="fn">starts_with</span>(<span class="st">"A"</span>));</code></pre>
+
+            <h3>Exemple avec Trait pour différents backends</h3>
+            <pre><code><span class="kw">trait</span> <span class="ty">Store</span>&lt;<span class="ty">T</span>&gt; {
+    <span class="kw">fn</span> <span class="fn">save</span>(&<span class="kw">mut</span> <span class="ty">self</span>, item: <span class="ty">T</span>) <span class="ty">-> Result</span>&lt;(), <span class="ty">String</span>&gt;;
+    <span class="kw">fn</span> <span class="fn">load</span>(&<span class="ty">self</span>, id: <span class="ty">u32</span>) <span class="ty">-> Result</span>&lt;<span class="ty">Option</span>&lt;<span class="ty">T</span>&gt;, <span class="ty">String</span>&gt;;
+}
+
+<span class="kw">struct</span> <span class="ty">MemoryStore</span>&lt;<span class="ty">T</span>&gt; {
+    data: <span class="ty">Vec</span>&lt;<span class="ty">T</span>&gt;,
+}
+
+<span class="kw">impl</span>&lt;<span class="ty">T</span>&gt; <span class="ty">Store</span>&lt;<span class="ty">T</span>&gt; <span class="kw">for</span> <span class="ty">MemoryStore</span>&lt;<span class="ty">T</span>&gt; {
+    <span class="kw">fn</span> <span class="fn">save</span>(&<span class="kw">mut</span> <span class="ty">self</span>, item: <span class="ty">T</span>) <span class="ty">-> Result</span>&lt;(), <span class="ty">String</span>&gt; {
+        <span class="ty">self</span>.data.<span class="fn">push</span>(item);
+        <span class="ty">Ok</span>(())
+    }
+
+    <span class="kw">fn</span> <span class="fn">load</span>(&<span class="ty">self</span>, id: <span class="ty">u32</span>) <span class="ty">-> Result</span>&lt;<span class="ty">Option</span>&lt;<span class="ty">T</span>&gt;, <span class="ty">String</span>&gt; {
+        <span class="ty">Ok</span>(<span class="ty">self</span>.data.<span class="fn">get</span>(id <span class="kw">as</span> <span class="ty">usize</span>).<span class="fn">cloned</span>())
+    }
+}</code></pre>
+
+            <details class="pitfalls">
+                <summary>⚠️ Pièges courants</summary>
+                <ul>
+                    <li><strong>Transactions ignorées</strong>: une DB sans transactions peut être corrompue si un insert échoue à mi-chemin. Pensez à la cohérence des données.</li>
+                    <li><strong>Pas d'index</strong>: une simple Vec est O(n) pour les recherches. Si la DB grandit, vous avez besoin d'index (HashMap).</li>
+                    <li><strong>Concurrence naïve</strong>: Arc&lt;Mutex&lt;DB&gt;&gt; fonctionne mais se serialize tout. Pour une vraie DB, vous avez besoin de concurrence plus fine (read-write locks, sharding).</li>
+                </ul>
+            </details>
+
+            <div class="exercises-ref">→ Exercices: ex23, ex24, ex25</div>
+        </section>
+
+        <!-- Aide-mémoire -->
+        <section id="cheatsheet">
+            <h2>💾 Aide-mémoire: Syntaxe Rust rapide</h2>
+
+            <div class="cheatsheet-grid">
+                <div class="cheatsheet-item">
+                    <h4>Variables & Types</h4>
+                    <code><span class="kw">let</span> x = 5;         <span class="cm">// i32, immutable</span></code>
+                    <code><span class="kw">let mut</span> y = 10;    <span class="cm">// mutable</span></code>
+                    <code><span class="kw">let</span> z: <span class="ty">f64</span> = 3.14; <span class="cm">// explicite</span></code>
+                    <code><span class="kw">const</span> PI: <span class="ty">f64</span> = 3.14;</code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Fonctions</h4>
+                    <code><span class="kw">fn</span> <span class="fn">foo</span>(x: <span class="ty">i32</span>) <span class="ty">-> i32</span> {</code>
+                    <code>    x + 1</code>
+                    <code>}</code>
+                    <code><span class="kw">fn</span> <span class="fn">bar</span>(s: &<span class="ty">str</span>) {}</code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Ownership & Refs</h4>
+                    <code><span class="kw">let</span> s = <span class="st">"hello"</span>.to_string();</code>
+                    <code><span class="fn">foo</span>(&s);    <span class="cm">// borrow immu</span></code>
+                    <code><span class="fn">foo</span>(&<span class="kw">mut</span> s);  <span class="cm">// borrow mut</span></code>
+                    <code><span class="kw">let</span> t = s;  <span class="cm">// move</span></code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Structs</h4>
+                    <code><span class="kw">struct</span> <span class="ty">Person</span> {</code>
+                    <code>    name: <span class="ty">String</span>,</code>
+                    <code>    age: <span class="ty">u32</span>,</code>
+                    <code>}</code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Enums & Pattern Match</h4>
+                    <code><span class="kw">enum</span> <span class="ty">Color</span> { Red, Blue }</code>
+                    <code><span class="kw">match</span> c {</code>
+                    <code>    <span class="ty">Color</span>::Red =&gt; {}</code>
+                    <code>    <span class="ty">Color</span>::Blue =&gt; {}</code>
+                    <code>}</code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Option&lt;T&gt;</h4>
+                    <code><span class="kw">let</span> x: <span class="ty">Option</span>&lt;<span class="ty">i32</span>&gt; = <span class="ty">Some</span>(5);</code>
+                    <code>x.<span class="fn">unwrap</span>();</code>
+                    <code>x.<span class="fn">map</span>(|v| v + 1);</code>
+                    <code>x.<span class="fn">unwrap_or</span>(0);</code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Result&lt;T, E&gt;</h4>
+                    <code><span class="kw">fn</span> <span class="fn">foo</span>() <span class="ty">-> Result</span>&lt;<span class="ty">i32</span>, <span class="ty">String</span>&gt;</code>
+                    <code><span class="ty">Ok</span>(42)</code>
+                    <code><span class="ty">Err</span>(<span class="st">"error"</span>.into())</code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Itérateurs</h4>
+                    <code><span class="kw">let</span> v = <span class="fn">vec!</span>[1, 2, 3];</code>
+                    <code>v.<span class="fn">iter</span>()</code>
+                    <code>  .<span class="fn">filter</span>(|x| *x > 1)</code>
+                    <code>  .<span class="fn">map</span>(|x| x * 2)</code>
+                    <code>  .<span class="fn">collect</span>()</code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Closures</h4>
+                    <code>|x| x + 1</code>
+                    <code>|x: <span class="ty">i32</span>| <span class="ty">-> i32</span> { x + 1 }</code>
+                    <code><span class="kw">move</span> |x| x + y</code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Traits</h4>
+                    <code><span class="kw">trait</span> <span class="ty">Drawable</span> {</code>
+                    <code>    <span class="kw">fn</span> <span class="fn">draw</span>(&<span class="ty">self</span>);</code>
+                    <code>}</code>
+                    <code><span class="kw">impl</span> <span class="ty">Drawable</span> <span class="kw">for</span> <span class="ty">T</span> {}</code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Génériques</h4>
+                    <code><span class="kw">struct</span> <span class="ty">Box</span>&lt;<span class="ty">T</span>&gt; { .. }</code>
+                    <code><span class="kw">fn</span> <span class="fn">foo</span>&lt;<span class="ty">T</span>: <span class="ty">Clone</span>&gt;() {}</code>
+                    <code><span class="kw">where</span> <span class="ty">T</span>: <span class="ty">Debug</span></code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Lifetimes</h4>
+                    <code>&<span class="st">'a str</span></code>
+                    <code><span class="kw">fn</span> <span class="fn">foo</span>&lt;<span class="st">'a</span>&gt;(s: &<span class="st">'a str</span>)</code>
+                    <code><span class="st">'static</span></code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Collections</h4>
+                    <code><span class="kw">let</span> v: <span class="ty">Vec</span>&lt;<span class="ty">i32</span>&gt; = <span class="fn">vec!</span>[];</code>
+                    <code><span class="kw">let</span> m: <span class="ty">HashMap</span>&lt;_&gt; = [].iter()...</code>
+                    <code><span class="kw">let</span> s: <span class="ty">HashSet</span>&lt;_&gt; = ...</code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Smart Pointers</h4>
+                    <code><span class="kw">Box</span>&lt;<span class="ty">T</span>&gt;</code>
+                    <code><span class="kw">Rc</span>&lt;<span class="ty">T</span>&gt;, <span class="kw">Arc</span>&lt;<span class="ty">T</span>&gt;</code>
+                    <code><span class="kw">RefCell</span>&lt;<span class="ty">T</span>&gt;</code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Gestion d'erreurs</h4>
+                    <code><span class="kw">fn</span> <span class="fn">foo</span>() <span class="ty">-> Result</span>&lt;(), <span class="ty">E</span>&gt; {</code>
+                    <code>    bar()?;   <span class="cm">// remonte</span></code>
+                    <code>    <span class="ty">Ok</span>(())</code>
+                    <code>}</code>
+                </div>
+
+                <div class="cheatsheet-item">
+                    <h4>Concurrence</h4>
+                    <code><span class="kw">thread</span>::<span class="fn">spawn</span>(||{})</code>
+                    <code>mpsc::<span class="fn">channel</span>()</code>
+                    <code><span class="ty">Mutex</span>&lt;<span class="ty">T</span>&gt;</code>
+                    <code><span class="ty">Arc</span>&lt;<span class="ty">Mutex</span>&lt;<span class="ty">T</span>&gt;&gt;</code>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Bon courage Raphaël ! 🦀</p>
+    </footer>
+    <script>
+    function toggleHeader() {
+        const header = document.getElementById('main-header');
+        const btn = document.getElementById('toggle-btn');
+        header.classList.toggle('expanded');
+        btn.textContent = header.classList.contains('expanded') ? '▲' : '▼';
+    }
+
+    // Auto-collapse on scroll down, expand on scroll to top
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+        const header = document.getElementById('main-header');
+        const btn = document.getElementById('toggle-btn');
+        const currentScroll = window.scrollY;
+        if (currentScroll > 200 && header.classList.contains('expanded')) {
+            header.classList.remove('expanded');
+            btn.textContent = '▼';
+        } else if (currentScroll < 50 && !header.classList.contains('expanded')) {
+            header.classList.add('expanded');
+            btn.textContent = '▲';
+        }
+        lastScroll = currentScroll;
+    });
+    </script>
+</body>
+</html>
