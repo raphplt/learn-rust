@@ -24,31 +24,44 @@
 /// Déclarez une constante gravitationnelle G = 6.674e-11
 /// et retournez sa valeur.
 fn declare_constant() -> f64 {
-    todo!("Déclare la constante G et retourne sa valeur")
+    const G: f64 = 6.674e-11;
+    G
+   
 }
 
 /// Créez une variable immutable x = 10, puis un shadowing
 /// pour en faire x = "10". Retournez la longueur de la chaîne.
 fn shadowing_demo() -> usize {
-    todo!("Crée x = 10, puis shadowing avec x = \"10\", retourne la longueur")
+    let x = 10;
+    let x = "10";
+    x.len()
 }
 
 /// Créez une variable mutable temperature = 20.0,
 /// modifiez-la à 25.0, puis retournez la différence avec la valeur initiale.
 fn mutable_temperature() -> f64 {
-    todo!("Crée temperature mutable, la modifie à 25.0, retourne la différence")
+   let mut temperature = 20.0;
+    let temp     = temperature;
+    temperature = 25.0;
+    temperature - temp
 }
 
 /// Déclarez trois variables immutables: a = 5, b = 10, c = 3.
 /// Retournez a + b * c (respectez la priorité des opérations).
 fn immutable_math() -> i32 {
-    todo!("Déclare a, b, c et retourne a + b * c")
+    let (a,b,c) = (5,10,3);
+    a+b*c
+
 }
 
 /// Créez une variable mutable counter = 0. Incrémentez-la 5 fois dans une boucle.
 /// Retournez la valeur finale.
 fn mutable_counter() -> i32 {
-    todo!("Crée counter mutable, l'incrémente 5 fois, retourne sa valeur finale")
+    let mut counter = 0;
+    for _n in 1..6 {
+        counter+= 1;
+    }
+    counter
 }
 
 // ---- Tests (ne pas modifier) ----
