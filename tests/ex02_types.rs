@@ -24,7 +24,8 @@
 /// Créez un tuple contenant un entier, un booléen et une chaîne.
 /// Retournez la longueur de la chaîne du tuple.
 fn tuple_demo() -> usize {
-    todo!("Crée un tuple (i32, bool, &str) et retourne la longueur de la chaîne")
+    let t: (i32, bool, &str) = (5, true, "aaaaa");
+    t.2.len()
 }
 
 /// Créez un array de 5 entiers [10, 20, 30, 40, 50].
