@@ -18,33 +18,32 @@
 // ============================================================
 
 #[allow(dead_code)]
-
 // ---- Fonctions à compléter ----
 
 /// Écrivez une fonction qui prend deux i32 et retourne leur somme.
 fn add(a: i32, b: i32) -> i32 {
-    todo!("Retourne a + b")
+    a + b
 }
 
 /// Écrivez une fonction qui prend un &str et retourne sa longueur.
 fn string_length(s: &str) -> usize {
-    todo!("Retourne la longueur de s")
+    s.len()
 }
 
 /// Écrivez une fonction qui prend un nombre et retourne true si c'est pair,
 /// false sinon.
 fn is_even(n: i32) -> bool {
-    todo!("Retourne true si n est pair")
+    n % 2 == 0
 }
 
 /// Écrivez une fonction qui prend trois nombres et retourne leur moyenne (arrondie).
 fn average(a: f64, b: f64, c: f64) -> f64 {
-    todo!("Retourne la moyenne de a, b, c")
+    ((a + b + c) / 3.0).ceil()
 }
 
 /// Écrivez une fonction sans paramètres qui retourne la constante π (approximation 3.14159).
 fn pi() -> f64 {
-    todo!("Retourne π")
+    std::f64::consts::PI
 }
 
 // ---- Tests (ne pas modifier) ----
