@@ -18,34 +18,72 @@
 // ============================================================
 
 #[allow(dead_code)]
-
 // ---- Fonctions à compléter ----
 
 /// Retournez "grand" si n >= 100, "moyen" si n >= 50, sinon "petit".
 fn categorize(n: i32) -> &'static str {
-    todo!("Retourne la catégorie selon n")
+    if n >= 100 {
+        return "grand";
+    }
+    if n >= 50 {
+        return "moyen";
+    } else {
+        "petit"
+    }
 }
 
 /// Utilisez match pour retourner le nom du mois (1 -> "Janvier", etc.).
 /// Cas par défaut: "Invalide".
 fn month_name(month: i32) -> &'static str {
-    todo!("Retourne le nom du mois correspondant")
+    match month {
+        1 => "Janvier",
+        2 => "Février",
+        3 => "Mars",
+        4 => "Avril",
+        5 => "Mai",
+        6 => "Juin",
+        7 => "Juillet",
+        8 => "Aout",
+        9 => "Septembre",
+        10 => "Octobre",
+        11 => "Novembre",
+        12 => "Décembre",
+        _ => "Invalide",
+    }
 }
 
 /// Bouclez de 1 à 10 (inclus) et retournez la somme.
 fn sum_to_10() -> i32 {
-    todo!("Retourne la somme des nombres de 1 à 10")
+    let mut sum = 0;
+    let mut i = 0;
+    while i < 11 {
+        sum = sum + i;
+        i += 1
+    }
+    sum
 }
 
 /// Retournez le nombre de nombres pairs dans le range 1 à 20.
 fn count_even_to_20() -> i32 {
-    todo!("Compte les nombres pairs de 1 à 20")
+    let mut even = 0;
+    for n in 1..21 {
+        if n % 2 == 0 {
+            even = even + 1
+        }
+    }
+    even
 }
 
 /// Créez une boucle infinie qui s'arrête quand une variable >= 100.
 /// Retournez le nombre d'itérations.
 fn loop_until_100() -> i32 {
-    todo!("Boucle jusqu'à ce qu'une variable >= 100, retourne le nombre d'itérations")
+    let mut variable = 0;
+    let mut count = 0;
+    while variable < 100 {
+        variable += 1;
+        count += 1
+    }
+    count
 }
 
 // ---- Tests (ne pas modifier) ----
